@@ -14,7 +14,7 @@ export interface TsSuccessResponse<T> {
   isSuccess: true;
   data: T;
   statusCode: number;
-  header: any;
+  header: Record<string, string>;
   cookies: string[];
 }
 
@@ -33,10 +33,8 @@ class TsRequests {
 
   interceptors = {
     request: (options: RequestOptions) => options,
-    response: (
-      response:
-        | TsSuccessResponse<string | AnyObject | ArrayBuffer>
-        | TsFailResponse
+    response: <T>(
+      response: TsSuccessResponse<APIResponse<T>> | TsFailResponse
     ) => response,
   };
 
@@ -44,7 +42,9 @@ class TsRequests {
     this.Options = Object.assign(this.Options, params);
   }
 
-  request<T>(options: RequestOptions): Promise<TsSuccessResponse<T>> {
+  request<T>(
+    options: RequestOptions
+  ): Promise<TsSuccessResponse<APIResponse<T>>> {
     options = {
       ...this.Options,
       ...options,
@@ -60,8 +60,8 @@ class TsRequests {
               Object.assign(res, {
                 config: options,
                 isSuccess: true as true,
-              })
-            ) as TsSuccessResponse<T>
+              }) as TsSuccessResponse<APIResponse<T>>
+            ) as TsSuccessResponse<APIResponse<T>>
           );
         },
         fail: (err) => {

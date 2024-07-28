@@ -4,5 +4,7 @@
     "lib": ["esnext", "dom"],
     "types": ["@dcloudio/types"],
     "forceConsistentCasingInFileNames": true
-  }
+  },
+  "files": [".d.ts"],
+  "include": ["*.ts"]
 }
