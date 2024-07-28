@@ -9,14 +9,19 @@ export interface RequestOptions {
   timeout?: number;
 }
 
-export type TsSuccessResponse = UniApp.RequestSuccessCallbackResult & {
+export interface TsSuccessResponse<T> {
   config: RequestOptions;
   isSuccess: true;
-};
+  data: T;
+  statusCode: number;
+  header: any;
+  cookies: string[];
+}
 
-export type TsFailResponse = UniApp.GeneralCallbackResult & {
+export type TsFailResponse = {
   config: RequestOptions;
   isSuccess: false;
+  errMsg: string;
 };
 
 class TsRequests {
@@ -28,14 +33,18 @@ class TsRequests {
 
   interceptors = {
     request: (options: RequestOptions) => options,
-    response: (response: TsSuccessResponse | TsFailResponse) => response,
+    response: (
+      response:
+        | TsSuccessResponse<string | AnyObject | ArrayBuffer>
+        | TsFailResponse
+    ) => response,
   };
 
   constructor(params: Partial<RequestOptions>) {
     this.Options = Object.assign(this.Options, params);
   }
 
-  request(options: RequestOptions): Promise<TsSuccessResponse> {
+  request<T>(options: RequestOptions): Promise<TsSuccessResponse<T>> {
     options = {
       ...this.Options,
       ...options,
@@ -52,7 +61,7 @@ class TsRequests {
                 config: options,
                 isSuccess: true as true,
               })
-            ) as TsSuccessResponse
+            ) as TsSuccessResponse<T>
           );
         },
         fail: (err) => {
@@ -69,16 +78,12 @@ class TsRequests {
     });
   }
 
-  get(options: RequestOptions) {
-    return this.request(Object.assign(options, { method: "GET" }));
+  get<T>(options: RequestOptions) {
+    return this.request<T>(Object.assign(options, { method: "GET" }));
   }
 
-  post(options: RequestOptions) {
-    return this.request(Object.assign(options, { method: "POST" }));
-  }
-
-  all(...promises: Promise<TsSuccessResponse>[]) {
-    return Promise.all(promises);
+  post<T>(options: RequestOptions) {
+    return this.request<T>(Object.assign(options, { method: "POST" }));
   }
 }
 
